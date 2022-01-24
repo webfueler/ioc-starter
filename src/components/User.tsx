@@ -23,7 +23,7 @@ const User: React.FC = () => {
     const { id: routeId } = useParams();
     const [user, setUser] = useState<IUser | null>(null);
 
-    useEffect(() => {
+    const onUserChange = (): void => {
         const params = convertRouteToParams(routeId);
         if (!params) {
             return;
@@ -38,7 +38,9 @@ const User: React.FC = () => {
                 return users;
             })
             .catch((error) => console.log(error));
-    }, [routeId]);
+    };
+
+    useEffect(onUserChange, [routeId]);
 
     return (
         <>

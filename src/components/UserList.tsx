@@ -9,7 +9,7 @@ const UserList: React.FC = () => {
     const { page: routePage } = useParams();
     const page = Number.parseInt(routePage || '1', 10);
 
-    useEffect(() => {
+    const onPageChange = (): void => {
         fetchUsers(page)
             .then((users) => {
                 if (users && 'results' in users) {
@@ -18,7 +18,9 @@ const UserList: React.FC = () => {
                 return users;
             })
             .catch((error) => console.log(error));
-    }, [page]);
+    }
+
+    useEffect(onPageChange, [page]);
 
     return (
         <div>
