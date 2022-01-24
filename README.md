@@ -1,13 +1,8 @@
 # Hey Developer 👋
 
+This is a starter project for a lecture on React Ecosystem with MobX and Inversify JS
+
 ## Tecnology Used
 
--   React (TSX)
--   SCSS
-
-## Recomendations
-
--   BEM & SMACSS methodology
--   CSS Variables
--   Style Isolation
--   Reusable Componentes
+- React
+- Typescript
