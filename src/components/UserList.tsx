@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { IUser } from '../interfaces/User';
+import type { IUser } from '../interfaces/User';
 import { fetchUsers } from '../api/fetchUsers';
 
-const UserList = (): JSX.Element => {
+const UserList: React.FC = () => {
     const [users, setUsers] = useState<IUser[]>([]);
 
     const { page: routePage } = useParams();
@@ -17,24 +17,24 @@ const UserList = (): JSX.Element => {
                 }
                 return users;
             })
-            .catch((error) => error);
+            .catch((error) => console.log(error));
     }, [page]);
 
     return (
         <div>
-            {users && (
+            { users && (
                 <ul>
-                    {users.map((user) => (
+                    { users.map((user) => (
                         <li key={user.email}>
                             <Link to={`/user/${page}-10-${user.email}`}>
-                                {user.email}
+                                { user.email }
                             </Link>
                         </li>
-                    ))}
+                    )) }
                 </ul>
-            )}
-            {page > 1 && <Link to={`/users/${page - 1}`}>Previous Page</Link>}
-            {page}
+            ) }
+            { page > 1 && <Link to={`/users/${page - 1}`}>Previous Page</Link> }
+            { page }
             <Link to={`/users/${page + 1}`}>Next Page</Link>
         </div>
     );

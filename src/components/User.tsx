@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { IUser, IUserIdentifier } from '../interfaces/User';
+import type { IUser, IUserIdentifier } from '../interfaces/User';
 import { fetchUsers } from '../api/fetchUsers';
 
 const convertRouteToParams = (routeId?: string): IUserIdentifier | null => {
@@ -19,7 +19,7 @@ const convertRouteToParams = (routeId?: string): IUserIdentifier | null => {
     }
 };
 
-const User = (): JSX.Element => {
+const User: React.FC = () => {
     const { id: routeId } = useParams();
     const [user, setUser] = useState<IUser | null>(null);
 
@@ -37,22 +37,22 @@ const User = (): JSX.Element => {
                 }
                 return users;
             })
-            .catch((error) => error);
+            .catch((error) => console.log(error));
     }, [routeId]);
 
     return (
         <>
-            {user ? (
+            { user ? (
                 <div>
                     <h3>
-                        {user.name.title} {user.name.first} {user.name.last}
+                        { user.name.title } { user.name.first } { user.name.last }
                     </h3>
-                    <h5>{user.email}</h5>
+                    <h5>{ user.email }</h5>
                     <img src={user.picture.medium} alt={user.name.first} />
                 </div>
             ) : (
                 <div>User not found</div>
-            )}
+            ) }
         </>
     );
 };
