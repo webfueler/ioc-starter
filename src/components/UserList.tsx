@@ -1,26 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { IUser } from '../interfaces/User';
-import { fetchUsers } from '../api/fetchUsers';
+import { TYPES } from '../ioc/types';
+import type { IUserStore } from '../stores/UserStore';
+import { injectableProvider } from '../ioc/provider/injectableProvider';
 
-const UserList: React.FC = () => {
-    const [users, setUsers] = useState<IUser[]>([]);
+type Props = {
+    userStore: IUserStore
+}
 
+const UserListComponent: React.FC<Props> = ({ userStore }) => {
     const { page: routePage } = useParams();
     const page = Number.parseInt(routePage || '1', 10);
 
+    const { users } = userStore;
+
     const onPageChange = (): void => {
-        fetchUsers(page)
-            .then((users) => {
-                if (users && 'results' in users) {
-                    setUsers(users.results);
-                }
-                return users;
-            })
-            .catch((error) => console.log(error));
+        userStore.loadUsersInPage(page).catch(e => console.log(e));
     }
 
-    useEffect(onPageChange, [page]);
+    useEffect(onPageChange, [page, userStore]);
 
     return (
         <div>
@@ -41,6 +39,10 @@ const UserList: React.FC = () => {
         </div>
     );
 };
+
+const UserList = injectableProvider<Props>({
+    userStore: TYPES.userStore
+})(UserListComponent);
 
 export { UserList };
 export default UserList;

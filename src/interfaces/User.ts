@@ -23,7 +23,7 @@ export interface IUser {
 export interface IUserIdentifier {
     page: number;
     resultsPerPage: number;
-    name: string;
+    email: string;
 }
 
 export interface IUserResponse {
