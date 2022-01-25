@@ -1,19 +1,14 @@
-import { injectable } from "inversify";
-import { IUserResponse, IUser } from "../interfaces/User";
-
-export interface IUserService {
-    fetchUsers: (page: number,
-        resultsPerPage?: number,
-        email?: string) => Promise<IUserResponse | IUser[] | null>;
-}
+import { injectable } from 'inversify';
+import { IUserIdentifier, IUserResponse, IUserService } from './interfaces';
+import type { IFetchUsersResponse } from './interfaces';
 
 @injectable()
 class UserService implements IUserService {
-    fetchUsers = (
+    fetchUsers = ({
         page = 1,
         resultsPerPage = 10,
-        email = ''
-    ): Promise<IUserResponse | IUser[] | null> => {
+        email = '',
+    }: IUserIdentifier): Promise<IFetchUsersResponse> => {
         console.time('API response time');
         const results = fetch(
             `https://randomuser.me/api/?page=${page}&results=${resultsPerPage}&seed=inversifyjs`

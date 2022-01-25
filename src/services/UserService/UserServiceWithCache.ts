@@ -1,21 +1,17 @@
-import { injectable } from "inversify";
-import { IUserResponse, IUser } from "../interfaces/User";
-
-export interface IUserService {
-    fetchUsers: (page: number,
-        resultsPerPage?: number,
-        email?: string) => Promise<IUserResponse | IUser[] | null>;
-}
+import { injectable } from 'inversify';
+import { IUserIdentifier, IUserResponse, IUserService } from './interfaces';
+import type { IFetchUsersResponse } from './interfaces';
 
 @injectable()
 class UserServiceWithCache implements IUserService {
-    private cache: Map<string, string> = new Map();
+    // don't do cache like this, it will break your app
+    private cache: Map<string, string> = new Map()
 
-    fetchUsers = (
+    fetchUsers = ({
         page = 1,
         resultsPerPage = 10,
-        email = ''
-    ): Promise<IUserResponse | IUser[] | null> => {
+        email = '',
+    }: IUserIdentifier): Promise<IFetchUsersResponse> => {
         console.time('API response time');
         const url = `https://randomuser.me/api/?page=${page}&results=${resultsPerPage}&seed=inversifyjs`;
         if (this.cache.has(url)) {
@@ -26,9 +22,7 @@ class UserServiceWithCache implements IUserService {
                 : users);
         }
 
-        const results = fetch(
-            `https://randomuser.me/api/?page=${page}&results=${resultsPerPage}&seed=inversifyjs`
-        )
+        const results = fetch(url)
             .then((response) => {
                 console.timeEnd('API response time');
                 return response.json();

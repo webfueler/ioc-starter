@@ -3,10 +3,11 @@ import 'reflect-metadata';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { UserList } from './components/UserList';
-import { User } from './components/User';
 import { ContainerProvider } from './ioc/components/ContainerProvider';
 import { container } from './ioc/inversify.config';
+
+import { UserList } from './components/UserList';
+import { User } from './components/User';
 
 import './index.css';
 

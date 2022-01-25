@@ -1,52 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import type { IUser, IUserIdentifier } from '../interfaces/User';
-import { IUserService } from '../services/UserService';
-import { injectableProvider } from '../ioc/provider/injectableProvider';
-import { TYPES } from '../ioc/types';
-
-const convertRouteToParams = (routeId?: string): IUserIdentifier | null => {
-    if (!routeId) return null;
-
-    try {
-        const route = routeId.split('-');
-        const [page, resultsPerPage, email] = route;
-        return {
-            page: Number.parseInt(page, 10),
-            resultsPerPage: Number.parseInt(resultsPerPage, 10),
-            email,
-        };
-    } catch (error) {
-        return null;
-    }
-};
+import { TYPES } from '../../src/ioc/types';
+import { IUserStore } from '../../src/stores/UserStore';
+import { injectableProvider } from '../../src/ioc/providers/injectableProvider';
+import { IUserRoutesService } from '../services/UserRoutesService/interfaces';
 
 type Props = {
-    userService: IUserService;
+    userStore: IUserStore;
+    userRoutesService: IUserRoutesService;
 }
 
-const UserComponent: React.FC<Props> = ({ userService }) => {
+const UserComponent: React.FC<Props> = ({ userStore, userRoutesService }) => {
     const { id: routeId } = useParams();
-    const [user, setUser] = useState<IUser | null>(null);
+    const  { user } = userStore;
 
     const onUserChange = (): void => {
-        const params = convertRouteToParams(routeId);
+        const params = userRoutesService.getUserFromSlug(routeId || '');
         if (!params) {
             return;
         }
-
-        const { page, resultsPerPage, email } = params;
-        userService.fetchUsers(page, resultsPerPage, email)
-            .then((users) => {
-                if (users && Array.isArray(users)) {
-                    setUser(users[0]);
-                }
-                return users;
-            })
-            .catch((error) => console.log(error));
+        userStore.loadUser(params).catch((error) => console.log(error));
     };
 
-    useEffect(onUserChange, [routeId, userService]);
+    useEffect(onUserChange, [routeId, userStore, userRoutesService]);
 
     return (
         <>
@@ -66,8 +42,9 @@ const UserComponent: React.FC<Props> = ({ userService }) => {
 };
 
 const User = injectableProvider({
-    userService: TYPES.userService
-})(UserComponent);
+    userStore: TYPES.userStore,
+    userRoutesService: TYPES.userRoutesService
+ })(UserComponent);
 
-export { User };
+export { User, UserComponent };
 export default User;

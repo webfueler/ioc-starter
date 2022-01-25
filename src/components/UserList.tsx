@@ -1,22 +1,23 @@
 import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useInjection } from '../ioc/hooks/useInjection';
 import { TYPES } from '../ioc/types';
-import type { IUserStore } from '../stores/UserStore';
-import { injectableProvider } from '../ioc/provider/injectableProvider';
+import { IUserStore } from '../../src/stores/UserStore';
+import { observer } from 'mobx-react';
+import { IUserRoutesService } from '../services/UserRoutesService/interfaces';
 
-type Props = {
-    userStore: IUserStore
-}
-
-const UserListComponent: React.FC<Props> = ({ userStore }) => {
+const UserList: React.FC = observer(() => {
     const { page: routePage } = useParams();
     const page = Number.parseInt(routePage || '1', 10);
+
+    const userStore = useInjection<IUserStore>(TYPES.userStore);
+    const userRoutesService = useInjection<IUserRoutesService>(TYPES.userRoutesService);
 
     const { users } = userStore;
 
     const onPageChange = (): void => {
-        userStore.loadUsersInPage(page).catch(e => console.log(e));
-    }
+        userStore.loadUsers({ page }).catch((error) => console.log(error));
+    };
 
     useEffect(onPageChange, [page, userStore]);
 
@@ -26,7 +27,11 @@ const UserListComponent: React.FC<Props> = ({ userStore }) => {
                 <ul>
                     { users.map((user) => (
                         <li key={user.email}>
-                            <Link to={`/user/${page}-10-${user.email}`}>
+                            <Link to={`/user/${userRoutesService.createUserSlug({
+                                page,
+                                resultsPerPage: 10,
+                                email: user.email
+                            })}`}>
                                 { user.email }
                             </Link>
                         </li>
@@ -38,11 +43,7 @@ const UserListComponent: React.FC<Props> = ({ userStore }) => {
             <Link to={`/users/${page + 1}`}>Next Page</Link>
         </div>
     );
-};
-
-const UserList = injectableProvider<Props>({
-    userStore: TYPES.userStore
-})(UserListComponent);
+});
 
 export { UserList };
 export default UserList;

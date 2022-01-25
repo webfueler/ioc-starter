@@ -1,19 +1,26 @@
-import { inject, injectable } from "inversify";
-import { action, makeObservable, observable, runInAction } from "mobx";
-import { IUser, IUserResponse } from "../interfaces/User";
-import { TYPES } from "../ioc/types";
-import { IUserService } from "../services/UserService";
+import { action, makeObservable, observable } from 'mobx';
+import { inject, injectable } from 'inversify';
+import {
+    IFetchUsersResponse,
+    IUser,
+    IUserIdentifier,
+    IUserService,
+} from '../services/UserService/interfaces';
+import { TYPES } from '../../src/ioc/types';
 
-export interface IUserStore {
+interface IUserStore {
+    user: IUser | null;
+    users: IUser[] | null;
     page: number;
-    users: IUser[];
-    loadUsersInPage: (page: number) => Promise<IUser[]>;
+    loadUsers: (params: IUserIdentifier) => Promise<IFetchUsersResponse>
+    loadUser: (params: IUserIdentifier) => Promise<IUser | null>
 }
 
 @injectable()
 class UserStore implements IUserStore {
-    @observable page = 1;
+    @observable user: IUser | null = null;
     @observable users: IUser[] = [];
+    @observable page = 1;
 
     constructor(
         @inject(TYPES.userService) private readonly userService: IUserService
@@ -22,32 +29,57 @@ class UserStore implements IUserStore {
     }
 
     @action
-    loadUsersInPage(page: number): Promise<IUser[]> {
+    loadUsers(params: IUserIdentifier): Promise<IUser[] | null> {
+        if (params.email) {
+            this.setUsers([]);
+            return Promise.resolve(null);
+        }
+
+        this.setPage(params.page);
+
+        return this.userService.fetchUsers(params).then((users) => {
+            if (!users || Array.isArray(users)) {
+                this.setUsers([]);
+                return null;
+            }
+            this.setUsers(users.results);
+            return users.results;
+        });
+    }
+
+    @action
+    loadUser(params: IUserIdentifier): Promise<IUser | null> {
+        if (params.email === '') {
+            this.setUser(null);
+            return Promise.resolve(null);
+        }
+
+        this.setPage(params.page);
+
+        return this.userService.fetchUsers(params).then((users) => {
+            if (!users || !Array.isArray(users)) {
+                this.setUser(null);
+                return null;
+            }
+            this.setUser(users[0]);
+            return users[0];
+        });
+    }
+
+    @action
+    setUser(user: IUser | null): void {
+        this.user = user;
+    }
+
+    @action
+    setUsers(users: IUser[]): void {
+        this.users = users;
+    }
+
+    @action
+    setPage(page: number): void {
         this.page = page;
-
-        return this.userService.fetchUsers(page)
-            .then(action((response: IUser[] | IUserResponse | null) => {
-                if (!response || !('results' in response)) {
-                    return [];
-                }
-
-                this.users = response.results;
-                return this.users;
-            })).catch((e) => {
-                console.log(e);
-                return [];
-            });
-    }
-
-    @action
-    private setPage(value: number): void {
-        this.page = value;
-    }
-
-    @action
-    private setUsers(value: IUser[]): void {
-        this.users = value;
     }
 }
 
-export { UserStore };
+export { UserStore, IUserStore };

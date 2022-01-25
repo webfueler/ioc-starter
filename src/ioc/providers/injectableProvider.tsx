@@ -26,7 +26,7 @@ const injectableProvider = <TInjectedProps, >(mappedIdentifiers: TIdentifiers<TI
 				const injectedProps = {} as TProp;
 				Object.keys(mappedIdentifiers).forEach((key) => {
                     const propToInject = key as TInjectedPropsKeys;
-                    injectedProps[propToInject] = container.get(mappedIdentifiers[propToInject]);
+					injectedProps[propToInject] = container.get(mappedIdentifiers[propToInject]);
 				});
 
 				const ObservedComponent = observer(Component);
